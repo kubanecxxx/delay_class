@@ -5,7 +5,7 @@
  *      Author: kubanec
  */
 
-#include "stm32f4xx.h"
+#include "inttypes.h"
 #include "delayclass.h"
 
 extern uint32_t TimeCounter;
