@@ -8,54 +8,82 @@
 #ifndef DELAYCLASS_H_
 #define DELAYCLASS_H_
 
-class delay_class
+#include <new>
+
+extern "C" void * _sbrk(int inc);
+
+class delay_new
 {
 public:
-	delay_class(void (*funkc)(void *), void * args , uint32_t cykle, bool once = false);
+	static void * operator new(size_t size)
+	{
+		return _sbrk(size);
+	}
+	/*
+	static void operator delete(void * address)
+	{
+		return;
+	}
+	*/
+};
+
+class delay_class: public delay_new
+{
+public:
+	delay_class(void (*funkc)(void *), void * args, uint32_t cykle, bool once =
+			false);
 	~delay_class();
-	void constructor(void (*funkc)(void *), void * args , uint32_t cykle, bool once = false);
 	void ResetDelay(void);
-	void destructor(void);
 	void SetDelay(uint32_t cykly);
-	void Stop (void){ cycles = 0;}
+	void Stop(void)
+	{
+		cycles = 0;
+	}
 	void Play(void);
 
 private:
-	void (* funkce) (void *);
+	void (*funkce)(void *);
 	uint32_t cycles;
 	uint32_t temp;
 	void * arg;
 	bool jednou;
 };
 
-template<class T> class simple_list
+template<class T, int S> class simple_list: public delay_new
 {
 public:
-	simple_list(void) {Clear();}
-	void push_back (T  item);
-	void Del (T item);
-	int GetCount (void) {return count;}
-	T GetItem (int index) ;
-	void Clear(void) {count = 0;}
+	simple_list(void)
+	{
+		Clear();
+	}
+	void push_back(T item);
+	void Del(T item);
+	int GetCount(void)
+	{
+		return count;
+	}
+	T GetItem(int index);
+	void Clear(void)
+	{
+		count = 0;
+	}
 
 private:
-	T  item[10];
+	T item[S];
 	int count;
 };
 
-class delay_process
+class delay_process: public delay_new
 {
 public:
 	delay_process();
-	void constructor(void);
 	void Add(delay_class * trida);
 	void Del(delay_class * trida);
 	void Play(void);
+	static delay_process * pointr;
 
 private:
-	simple_list<delay_class *> seznam_opakovat;
+	simple_list<delay_class *, 10> seznam_opakovat;
 };
-
-
 
 #endif /* DELAYCLASS_H_ */
