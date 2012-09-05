@@ -7,10 +7,10 @@
 
 #include "inttypes.h"
 #include "delayclass.h"
-
-extern uint32_t TimeCounter;
+#include "ch.h"
 
 delay_process * delay_process::pointr = 0;
+#define TimeCounter chTimeNow()
 
 /**
  * @note function with "once == true" will be executed only once but memory

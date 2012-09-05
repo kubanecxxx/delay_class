@@ -8,18 +8,16 @@
 #ifndef DELAYCLASS_H_
 #define DELAYCLASS_H_
 
-#include <new>
-
-extern "C" void * _sbrk(int inc);
+#include "ch.h"
 
 class delay_new
 {
 public:
 	static void * operator new(size_t size)
 	{
-		return _sbrk(size);
+		return chCoreAlloc(size);
 	}
-	/*
+/*
 	static void operator delete(void * address)
 	{
 		return;
