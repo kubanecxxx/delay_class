@@ -56,8 +56,8 @@ void delay_class::Play()
 	{
 		if (TimeCounter - temp > cycles)
 		{
-			funkce(arg);
 			temp = TimeCounter;
+			funkce(arg);
 			if (jednou)
 			{
 				Unregister();
