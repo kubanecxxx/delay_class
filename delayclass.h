@@ -16,8 +16,6 @@ class delay_class
 public:
 	delay_class(void (*funkc)(void *), void * args, uint32_t cykle, bool once =
 			false);
-	void Play(void);
-
 private:
 	void (*funkce)(void *);
 	void * arg;
@@ -28,6 +26,7 @@ private:
 
 	void Register(void);
 	void Unregister(void);
+	void Play(void);
 
 	friend class delay_process;
 
