@@ -1,2 +1,2 @@
-INCDIR += delay
-CPPSRC += delay/delayclass.cpp
+INCDIR += delay_class
+CPPSRC += delay_class/delayclass.cpp

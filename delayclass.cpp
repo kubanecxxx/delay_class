@@ -7,42 +7,44 @@
 
 #include "inttypes.h"
 #include "delayclass.h"
-#include "ch.h"
 
-delay_process * delay_process::pointr = 0;
-#define TimeCounter chTimeNow()
+delay_class * delay_process::first = 0;
 
 /**
  * @note function with "once == true" will be executed only once but memory
- * for delay_class will not be freed, only pointer will be freed
+ * for delay_class will not be freed
  */
 delay_class::delay_class(void (*funkc)(void *), void * args, uint32_t cykle,
-		bool once)
+		bool once) :
+		funkce(funkc), arg(args), cycles(cykle), temp(TimeCounter), jednou(
+				once), next(0)
 {
-	funkce = funkc;
-	arg = args;
-	cycles = cykle;
-	temp = TimeCounter;
-	jednou = once;
-
-	if (delay_process::pointr != 0)
-		delay_process::pointr->Add(this);
+	Register();
 }
 
-delay_class::~delay_class()
+void delay_class::Register()
 {
+	if (delay_process::first == 0)
+	{
+		delay_process::first = this;
+	}
+	else
+	{
+		delay_class * temp, *prev;
+		temp = delay_process::first;
 
+		while (temp != 0)
+		{
+			prev = temp;
+			temp = temp->next;
+		}
+		prev->next = this;
+	}
 }
 
-void delay_class::ResetDelay(void)
+void delay_class::Unregister(void)
 {
-	temp = TimeCounter;
-}
-
-void delay_class::SetDelay(uint32_t cykly)
-{
-	cycles = cykly;
-	temp = TimeCounter;
+	//najit ten pointer před nim a nastavit to na ten dalši...
 }
 
 /**
@@ -58,74 +60,25 @@ void delay_class::Play()
 			temp = TimeCounter;
 			if (jednou)
 			{
-				delay_process::pointr->Del(this);
+				Unregister();
 			}
 		}
 	}
 }
 /*
- * ********************************************************************
+ *********************************************************************
  */
-delay_process::delay_process()
-{
-	if (pointr == 0)
-		pointr = this;
-	else
-		while (1)
-			;
-}
-
-void delay_process::Add(delay_class * trida)
-{
-	seznam_opakovat.push_back(trida);
-}
-
-void delay_process::Del(delay_class * trida)
-{
-	seznam_opakovat.Del(trida);
-	;
-}
-
 /**
  * @brief run all registered delay_class's functions
  */
 void delay_process::Play()
 {
-	for (int i = 0; i < seznam_opakovat.GetCount(); i++)
+	delay_class * temp = first;
+
+	while (temp)
 	{
-		seznam_opakovat.GetItem(i)->Play();
+		temp->Play();
+		temp = temp->next;
 	}
-}
-
-/*
- * ********************************************************************
- */
-template<class T, int S> void simple_list<T, S>::push_back(T otem)
-{
-	item[count++] = otem;
-}
-
-template<class T, int S> void simple_list<T, S>::Del(T otem)
-{
-	for (int i = 0; i < count; i++)
-	{
-		if (item[i] == otem)
-		{
-			for (int j = i; j < count; j++)
-			{
-				item[j] = item[j + 1];
-			}
-			break;
-		}
-	}
-	count--;
-}
-
-template<class T, int S> T simple_list<T, S>::GetItem(int index)
-{
-	if (index < count)
-		return item[index];
-	else
-		return 0;
 }
 

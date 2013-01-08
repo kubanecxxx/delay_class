@@ -9,79 +9,52 @@
 #define DELAYCLASS_H_
 
 #include "ch.h"
+#define TimeCounter chTimeNow()
 
-class delay_new
-{
-public:
-	static void * operator new(size_t size)
-	{
-		return chCoreAlloc(size);
-	}
-/*
-	static void operator delete(void * address)
-	{
-		return;
-	}
-	*/
-};
-
-class delay_class: public delay_new
+class delay_class
 {
 public:
 	delay_class(void (*funkc)(void *), void * args, uint32_t cykle, bool once =
 			false);
-	~delay_class();
-	void ResetDelay(void);
-	void SetDelay(uint32_t cykly);
-	void Stop(void)
-	{
-		cycles = 0;
-	}
 	void Play(void);
 
 private:
 	void (*funkce)(void *);
+	void * arg;
 	uint32_t cycles;
 	uint32_t temp;
-	void * arg;
 	bool jednou;
+	delay_class * next;
+
+	void Register(void);
+	void Unregister(void);
+
+	friend class delay_process;
+
+public:
+	inline void ResetDelay(void)
+	{
+		temp = TimeCounter;
+	}
+	inline void SetDelay(uint32_t cykly)
+	{
+		cycles = cykly;
+		temp = TimeCounter;
+	}
+	inline void Stop(void)
+	{
+		cycles = 0;
+	}
 };
 
-template<class T, int S> class simple_list: public delay_new
+class delay_process
 {
 public:
-	simple_list(void)
-	{
-		Clear();
-	}
-	void push_back(T item);
-	void Del(T item);
-	int GetCount(void)
-	{
-		return count;
-	}
-	T GetItem(int index);
-	void Clear(void)
-	{
-		count = 0;
-	}
+	static void Play(void);
 
 private:
-	T item[S];
-	int count;
-};
-
-class delay_process: public delay_new
-{
-public:
-	delay_process();
-	void Add(delay_class * trida);
-	void Del(delay_class * trida);
-	void Play(void);
-	static delay_process * pointr;
-
-private:
-	simple_list<delay_class *, 10> seznam_opakovat;
+	friend class delay_class;
+	static delay_class * first;
 };
 
 #endif /* DELAYCLASS_H_ */
